@@ -16,8 +16,8 @@ aws.config.update({
 const upload = multer({
     storage:multerS3({
         bucket: process.env.BUCKET,
+        // bucket: process.env.BUCKET + "/photo",
         s3,
-        acl: "public-read",
         key: (req, file, cb)=>{
             cb(null, file.originalname)
         }
@@ -26,13 +26,11 @@ const upload = multer({
 })
 
 app.post("/upload", upload.single("file"), (req, res) => {
-    console.log(req.file)
     res.send("Successfully uploaded")
 })
 
 app.get("/list", async (req, res)=> {
     const result = await s3.listObjectsV2({Bucket: process.env.BUCKET}).promise()
-    console.log(result);
     let list = result.Contents.map(item=>item.Key);
     res.send(list);
 })
@@ -40,7 +38,6 @@ app.get("/list", async (req, res)=> {
 app.get("/download/:filename", async (req, res)=> {
     const filename = req.params.filename;
     const result = await s3.getObject({Bucket: process.env.BUCKET,Key: filename }).promise();
-    console.log(result);
     res.send(result.Body);
 })
 
